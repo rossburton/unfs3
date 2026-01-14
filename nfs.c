@@ -776,9 +776,11 @@ MKNOD3res *nfsproc3_mknod_3_svc(MKNOD3args * argp, struct svc_req * rqstp)
 
     PREP(path, argp->where.dir);
     pre = get_pre_cached();
-    result.status =
-        join3(cat_name(path, argp->where.name, obj),
-              mknod_args(argp->what, obj, &new_mode, &dev), exports_rw());
+    result.status = cat_name(path, argp->where.name, obj);
+    if (result.status == NFS3_OK)
+        result.status = mknod_args(argp->what, obj, &new_mode, &dev);
+    if (result.status == NFS3_OK)
+        result.status = exports_rw();
 
     cluster_create(obj, rqstp, &result.status);
 
